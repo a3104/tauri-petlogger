@@ -98,11 +98,18 @@ button {
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;
-    background-color: #2f2f2f;
+    background-color: #f0f0f0;
   }
 
   a:hover {
     color: #24c8db;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .MuiBox-root {
+      background-color: #ffffff;
+      color: #000000;
+    }
   }
 
   input,

@@ -23,6 +23,7 @@ export default function AddWeights() {
   const weightInputRef = useRef<HTMLInputElement>(null);
   const petRepository = new PetFileRepository();
   const [showChart, setShowChart] = useState(false);
+  const [targetWeight, setTargetWeight] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchPets = async () => {
@@ -41,7 +42,27 @@ export default function AddWeights() {
     }
   }, []);
 
-  
+  useEffect(() => {
+    if (selectedPetId !== null) {
+      const fetchWeights = async () => {
+        const records = await weightRepository.getWeights(Number(selectedPetId));
+        setWeightRecords(records);
+      };
+      fetchWeights();
+    }
+  }, [selectedPetId]);
+
+  useEffect(() => {
+    const fetchTargetWeight = async () => {
+      if (selectedPetId !== null) {
+        const pet = pets.find(p => p.id === selectedPetId);
+        if (pet) {
+          setTargetWeight(pet.targetWeight || null);
+        }
+      }
+    };
+    fetchTargetWeight();
+  }, [selectedPetId, pets]);
 
   const handleAddWeight = () => {
     if (weight !== null && date && selectedPetId !== null) {
@@ -138,12 +159,18 @@ export default function AddWeights() {
         <Typography variant="h6" component="h3">
           記録一覧
         </Typography>
-        {weightRecords.map((record, index) => (
-          <Box key={index} display="flex" justifyContent="space-between" mt={1}>
-            <Typography>{record.date}</Typography>
-            <Typography>{record.weight} kg</Typography>
-          </Box>
-        ))}
+        {weightRecords
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          .map((record, index) => (
+            <Box key={index} display="flex" justifyContent="space-between" mt={1}>
+              <Typography>{record.date}</Typography>
+              <Typography 
+                style={{ color: targetWeight && record.weight > targetWeight ? 'orange' : 'inherit' }}
+              >
+                {record.weight} kg
+              </Typography>
+            </Box>
+          ))}
       </Box>
     </Box>
   );

@@ -1,4 +1,4 @@
-use std::io::{ BufRead, Read, Write};
+use std::io::{BufRead, Read, Write};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -29,7 +29,9 @@ fn load_weights() -> Result<String, String> {
 fn save_weights(weights_json: String) -> Result<(), String> {
     let file = std::fs::File::create("../weights.json").map_err(|e| e.to_string())?;
     let mut writer = std::io::BufWriter::new(file);
-    writer.write_all(weights_json.as_bytes()).map_err(|e| e.to_string())?;
+    writer
+        .write_all(weights_json.as_bytes())
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -53,17 +55,27 @@ fn save_pets(pets_json: String) -> Result<(), String> {
     let file = std::fs::File::create("../pets.json").map_err(|e| e.to_string())?;
     let mut writer = std::io::BufWriter::new(file);
     println!("come");
-    writer.write_all(pets_json.as_bytes()).map_err(|e| e.to_string())?;
+    writer
+        .write_all(pets_json.as_bytes())
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, aaa, save_pets, load_pets, save_weights, load_weights])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            aaa,
+            save_pets,
+            load_pets,
+            save_weights,
+            load_weights
+        ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|_app_handle, _event| {})

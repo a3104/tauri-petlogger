@@ -23,7 +23,7 @@ export default function Register({ isVisible, pet, handleUpdate, hideRegister }:
             Number(form.get("birthMonth")),
             Number(form.get("birthDay")),
             Number(form.get("gender")),
-            form.get("nickname") as string
+            Number(form.get("targetWeight"))
         );
         handleUpdate(petData);
         setVisible(false);
@@ -92,12 +92,13 @@ export default function Register({ isVisible, pet, handleUpdate, hideRegister }:
                         <MenuItem value={0}>登録しない</MenuItem>
                     </Select>
                     <TextField
-                        label="ニックネーム"
+                        label="目標体重"
                         variant="outlined"
                         fullWidth
                         margin="normal"
-                        name="nickname"
-                        defaultValue={pet.nickname}
+                        name="targetWeight"
+                        defaultValue={pet.targetWeight}
+                        type="number"
                     />
                     <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                         <Button type="submit" variant="contained" color="primary" fullWidth>登録</Button>

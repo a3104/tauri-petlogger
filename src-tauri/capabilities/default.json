@@ -18,10 +18,10 @@
       "identifier": "fs:scope-appdata-recursive",
       "allow": [
         {
-          "path": "DATAS/**"
+          "path": "**"
         }
       ]
-    }
+    },
+    "store:default"
   ]
-
 }

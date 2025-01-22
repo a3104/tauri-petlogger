@@ -58,7 +58,7 @@ export const Pets = () => {
 
     return (
         <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
-            <Typography variant="h4" component="h1" gutterBottom>ペット一覧</Typography>
+            <Typography variant="h5" component="h1" gutterBottom>ペット一覧</Typography>
             <Button variant="contained" color="primary" onClick={handleNew}>新規登録</Button>
             {selectedPet && <Register isVisible={true} pet={selectedPet} handleUpdate={handleUpdate}
                 hideRegister={hideRegister} />}
@@ -66,36 +66,39 @@ export const Pets = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>id</TableCell>
-                            <TableCell>名前</TableCell>
-                            <TableCell>種別</TableCell>
-                            <TableCell>年齢</TableCell>
-                            <TableCell>誕生日</TableCell>
-                            <TableCell>性別</TableCell>
-                            <TableCell>操作</TableCell>
+                            <TableCell><Typography variant="body2">id</Typography></TableCell>
+                            <TableCell><Typography variant="body2">名前</Typography></TableCell>
+                            <TableCell><Typography variant="body2">種別</Typography></TableCell>
+                            <TableCell><Typography variant="body2">年齢</Typography></TableCell>
+                            {/* <TableCell><Typography variant="body2">誕生日</Typography></TableCell> */}
+                            <TableCell><Typography variant="body2">性別</Typography></TableCell>
+                            <TableCell><Typography variant="body2">体重</Typography></TableCell>
+                            <TableCell><Typography variant="body2">操作</Typography></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {pets && pets[0] && pets[0].id && pets.map((pet) => (
-                            <TableRow key={pet.id}>
-                                <TableCell>{pet.id}</TableCell>
-                                <TableCell>{pet.name}</TableCell>
-                                <TableCell>{pet.getAnimalType()}</TableCell>
-                                <TableCell>{pet.getAge()}才</TableCell>
-                                <TableCell>{pet.birthYear}年{pet.birthMonth}月{pet.birthDay}日</TableCell>
-                                <TableCell>{pet.gender === 1 ? "オス" : pet.gender === 2 ? "メス" : "登録しない"}</TableCell>
-                                {/* <TableCell>{pet.nickname}</TableCell> */}
+                        {pets && pets[0] && pets[0].id && pets.map((pet) => {
+                            const isOverWeight = pet.targetWeight !== null && pet.targetWeight !== 0 && pet.latestWeight > pet.targetWeight;
+                            return (
+                            <TableRow key={pet.id} style={{ backgroundColor: isOverWeight ? 'orange' : 'inherit' }}>
+                                <TableCell><Typography variant="body2">{pet.id}</Typography></TableCell>
+                                <TableCell><Typography variant="body2">{pet.name}</Typography></TableCell>
+                                <TableCell><Typography variant="body2">{pet.getAnimalType()}</Typography></TableCell>
+                                <TableCell><Typography variant="body2">{pet.getAge()}才</Typography></TableCell>
+                                {/* <TableCell><Typography variant="body2">{pet.birthYear}年{pet.birthMonth}月{pet.birthDay}日</Typography></TableCell> */}
+                                <TableCell><Typography variant="body2">{pet.gender === 1 ? "オス" : pet.gender === 2 ? "メス" : "-"}</Typography></TableCell>
+                                <TableCell><Typography variant="body2" >{pet.latestWeight ? `${pet.latestWeight} kg` : '-'}</Typography></TableCell>
                                 <TableCell>
-                                    <Button variant="outlined" color="primary"
+                                    <Button variant="outlined" color="primary" size="small"
                                         onClick={() => handleEdit(pet)}>編集</Button>
-                                    <Button variant="outlined" color="secondary"
+                                    <Button variant="outlined" color="secondary" size="small"
                                         onClick={async () => {
                                             let r = await confirm("本当に削除しますか？");
                                             r && handleDelete(pet.id);
                                         }}>削除</Button>
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        )})}
                     </TableBody>
                 </Table>
             </TableContainer>

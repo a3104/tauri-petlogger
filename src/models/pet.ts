@@ -7,8 +7,9 @@ export class Pet {
         public birthMonth: number = 1,
         public birthDay: number = 1,
         public gender: number = 0,
-        public nickname: string = ""
-    ) {}
+        public targetWeight: number = 0,
+        public latestWeight: number = 0
+    ) { }
 
     getAge(): number {
         const currentYear = new Date().getFullYear();
