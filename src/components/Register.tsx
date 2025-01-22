@@ -1,10 +1,8 @@
 "use client";
-import { Button, TextField, Select, MenuItem, FormControl, InputLabel, Box, Typography } from "@mui/material";
+import { Button, TextField, Select, MenuItem, InputLabel, Box, Typography } from "@mui/material";
 import { FormEvent, useState } from "react";
 import { Pet } from "../models/pet";
-import * as React from "react";
 
-type PetFormData = Omit<Pet, 'getAnimalType'>;
 
 export default function Register({ isVisible, pet, handleUpdate, hideRegister }: { isVisible: boolean, pet: Pet, handleUpdate: (pet: Pet) => void, hideRegister: () => void }) {
     const [visible, setVisible] = useState(isVisible);
@@ -87,7 +85,7 @@ export default function Register({ isVisible, pet, handleUpdate, hideRegister }:
                         name="gender"
                         defaultValue={pet.gender}
                         fullWidth
-                        margin="normal"
+                        margin="dense"
                     >
                         <MenuItem value={1}>オス</MenuItem>
                         <MenuItem value={2}>メス</MenuItem>

@@ -16,7 +16,7 @@ export class WeightRepository {
         return await invoke("load_weights");
     }
 
-    saveWeights(petId: number, weights: { petId: number; date: string; weight: number }[]): Promise<void> {
+    saveWeights(_: number, weights: { petId: number; date: string; weight: number }[]): Promise<void> {
         let json = JSON.stringify(weights);
         return this.saveWeightBridge(json);
     }
@@ -27,7 +27,7 @@ export class WeightRepository {
             let weights = JSON.parse(res);
             return weights.filter((weight: { petId: number; date: string; weight: number }) => weight.petId === petId);
         }).catch((err) => {
-            // alert(err);
+            alert(err);
             return [];
         });
     }

@@ -6,7 +6,6 @@ import VaccinesIcon from '@mui/icons-material/Vaccines';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import MedicationIcon from '@mui/icons-material/Medication';
 import ScienceIcon from '@mui/icons-material/Science';
-import Box from '@mui/material/Box';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 
 const MenuNavi = () => {
@@ -15,7 +14,7 @@ const MenuNavi = () => {
     return (
         <BottomNavigation
             value={value}
-            onChange={(event, newValue) => {
+            onChange={(_event, newValue) => {
                 setValue(newValue);
             }}
             showLabels

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Pet } from "../models/pet";
 import { TextField, Button, Box, Typography, MenuItem, Select } from "@mui/material";
 import PetFileRepository from "../repositories/PetFileRepository";
@@ -41,13 +41,7 @@ export default function AddWeights() {
     }
   }, []);
 
-  useEffect(() => {
-    if (selectedPetId !== null) {
-      const petWeightRecords = weightRepository.getWeights(selectedPetId).then((record) => {
-        setWeightRecords(record);
-      });
-    }
-  }, [selectedPetId]);
+  
 
   const handleAddWeight = () => {
     if (weight !== null && date && selectedPetId !== null) {

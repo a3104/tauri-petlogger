@@ -1,4 +1,3 @@
-import React from 'react';
 
 const Clinic = () => {
   return <h1>通院記録</h1>;
