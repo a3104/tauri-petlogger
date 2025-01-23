@@ -94,6 +94,8 @@ export default function Register({ isVisible, pet, handleUpdate, hideRegister }:
                     <TextField
                         label="目標体重"
                         variant="outlined"
+                        inputProps={{ step: "0.1" }}
+
                         fullWidth
                         margin="normal"
                         name="targetWeight"

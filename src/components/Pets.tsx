@@ -25,24 +25,34 @@ export const Pets = () => {
         });
         }, []);
 
-    const handleEdit = (pet: Pet) => {
+const handleEdit = (pet: Pet) => {
+    try {
         setSelectedPet(pet);
-    };
+        window.scrollTo(0, 0);
+    } catch (error) {
+        console.error("Error editing pet:", error);
+    }
+};
     const hideRegister = () => {
         setSelectedPet(null);
     }
 
 
-    const handleDelete = async (petId: number) => {
+const handleDelete = async (petId: number) => {
+    try {
         let updatedPets = pets.filter(pet => pet.id !== petId);
         setPets(updatedPets);
         await petRepository.saveAllPets(updatedPets);
-    };
+    } catch (error) {
+        console.error("Error deleting pet:", error);
+    }
+};
 
     const handleNew = () => {
         setSelectedPet(new Pet(0));
     };
-    const handleUpdate = async (pet: Pet) => {
+const handleUpdate = async (pet: Pet) => {
+    try {
         let updatedPets: Pet[];
         if (pet.id === 0) {
             const maxId = pets.reduce((max, p) => Math.max(max, p.id), 0);
@@ -54,7 +64,10 @@ export const Pets = () => {
         setPets(updatedPets);
         await petRepository.saveAllPets(updatedPets);
         setSelectedPet(null);
+    } catch (error) {
+        console.error("Error updating pet:", error);
     }
+};
 
     return (
         <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
@@ -72,7 +85,7 @@ export const Pets = () => {
                             <TableCell><Typography variant="body2">年齢</Typography></TableCell>
                             {/* <TableCell><Typography variant="body2">誕生日</Typography></TableCell> */}
                             <TableCell><Typography variant="body2">性別</Typography></TableCell>
-                            <TableCell><Typography variant="body2">体重</Typography></TableCell>
+                            <TableCell><Typography variant="body2">目標体重</Typography></TableCell>
                             <TableCell><Typography variant="body2">操作</Typography></TableCell>
                         </TableRow>
                     </TableHead>
@@ -87,7 +100,7 @@ export const Pets = () => {
                                 <TableCell><Typography variant="body2">{pet.getAge()}才</Typography></TableCell>
                                 {/* <TableCell><Typography variant="body2">{pet.birthYear}年{pet.birthMonth}月{pet.birthDay}日</Typography></TableCell> */}
                                 <TableCell><Typography variant="body2">{pet.gender === 1 ? "オス" : pet.gender === 2 ? "メス" : "-"}</Typography></TableCell>
-                                <TableCell><Typography variant="body2" >{pet.latestWeight ? `${pet.latestWeight} kg` : '-'}</Typography></TableCell>
+                                <TableCell><Typography variant="body2" >{pet.targetWeight ? `${pet.targetWeight} kg` : '-'}</Typography></TableCell>
                                 <TableCell>
                                     <Button variant="outlined" color="primary" size="small"
                                         onClick={() => handleEdit(pet)}>編集</Button>

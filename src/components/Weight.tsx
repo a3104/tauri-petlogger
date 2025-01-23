@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { Pet } from "../models/pet";
 import { TextField, Button, Box, Typography, MenuItem, Select } from "@mui/material";
 import PetFileRepository from "../repositories/PetFileRepository";
-import { weightRepository } from "../repositories/weightRepository";
+import {WeightRepository} from "../repositories/weightRepository"; 
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
+import { ScriptableLineSegmentContext } from 'chart.js';
 
 interface WeightRecord {
   petId: number;
@@ -18,10 +19,11 @@ export default function AddWeights() {
   const [pets, setPets] = useState<Pet[]>([] as Pet[]);
   const [selectedPetId, setSelectedPetId] = useState<number | null>(null);
   const [weight, setWeight] = useState<number | null>(null);
-  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [weightRecords, setWeightRecords] = useState<WeightRecord[]>([]);
   const weightInputRef = useRef<HTMLInputElement>(null);
   const petRepository = new PetFileRepository();
+  const weightRepository = new WeightRepository(); // 追加
   const [showChart, setShowChart] = useState(false);
   const [targetWeight, setTargetWeight] = useState<number | null>(null);
 
@@ -77,7 +79,7 @@ export default function AddWeights() {
       setWeightRecords(updatedRecords);
       weightRepository.saveWeights(Number(selectedPetId), updatedRecords);
       setWeight(null);
-      setDate(new Date().toISOString().split('T')[0]);
+      setDate(new Date().toISOString().slice(0, 10));
     }
   };
 
@@ -93,15 +95,25 @@ export default function AddWeights() {
     setShowChart(!showChart);
   };
 
+  const reversedWeightRecordsForChart = [...weightRecords].reverse();
+
   const chartData = {
-    labels: weightRecords.map(record => record.date),
+    labels: reversedWeightRecordsForChart.map(record => record.date),
     datasets: [
       {
         label: '体重 (kg)',
-        data: weightRecords.map(record => record.weight),
-        borderColor: 'rgba(75,192,192,1)',
+        data: reversedWeightRecordsForChart.map(record => record.weight),
+        borderColor: reversedWeightRecordsForChart.map(record => 
+          targetWeight && record.weight > targetWeight ? 'rgba(255,0,0,1)' : 'rgba(75,192,192,1)'
+        ),
         backgroundColor: 'rgba(75,192,192,0.2)',
         fill: true,
+        segment: {
+          borderColor: (ctx: ScriptableLineSegmentContext) => {
+            const weight = ctx.p0.parsed.y as number;
+            return targetWeight && weight > targetWeight ? 'rgba(255,0,0,1)' : 'rgba(75,192,192,1)';
+          }
+        }
       },
     ],
   };
@@ -168,7 +180,7 @@ export default function AddWeights() {
           記録一覧
         </Typography>
         {weightRecords
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).reverse()
           .map((record, index) => (
             <Box key={index} display="flex" justifyContent="space-between" mt={1}>
               <Typography>{record.date}</Typography>
