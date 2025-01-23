@@ -12,6 +12,7 @@ import Menu from "./components/menu";
 import Register from "./components/Register";
 import { Pet } from "./models/pet";
 import Pets from "./components/Pets";
+import Configuration from "./components/Configuration.tsx";
 
 function App() {
 
@@ -30,6 +31,7 @@ function App() {
                     } } />} />
                     <Route path="/weight" element={<Weight />} />
                     <Route path="/vaccination" element={<Vaccination />} />
+                    <Route path="/configuration" element={<Configuration />} />
                     {/* <Route path="/clinic" element={<Clinic />} />
                     <Route path="/medication" element={<Medication />} />
                     <Route path="/urine-test" element={<UrineTest />} /> */}

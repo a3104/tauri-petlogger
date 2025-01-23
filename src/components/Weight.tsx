@@ -81,6 +81,14 @@ export default function AddWeights() {
     }
   };
 
+  const handleDeleteWeight = (date: string) => {
+    if (selectedPetId !== null) {
+      const updatedRecords = weightRecords.filter(record => record.date !== date);
+      setWeightRecords(updatedRecords);
+      weightRepository.saveWeights(Number(selectedPetId), updatedRecords);
+    }
+  };
+
   const handleShowChart = () => {
     setShowChart(!showChart);
   };
@@ -169,6 +177,10 @@ export default function AddWeights() {
               >
                 {record.weight} kg
               </Typography>
+              
+              <Button variant="outlined" color="secondary" onClick={() => handleDeleteWeight(record.date)}>
+                削除
+              </Button>
             </Box>
           ))}
       </Box>
