@@ -1,3 +1,9 @@
+export interface ClinicVisit {
+    date: string;
+    hospitalName: string;
+    condition: string;
+}
+
 export class Pet {
     constructor(
         public id: number = 0,
@@ -8,7 +14,8 @@ export class Pet {
         public birthDay: number = 1,
         public gender: number = 0,
         public targetWeight: number = 0,
-        public latestWeight: number = 0
+        public latestWeight: number = 0,
+        public clinicVisits: ClinicVisit[] = []
     ) { }
 
     getAge(): number {
