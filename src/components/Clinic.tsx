@@ -5,6 +5,7 @@ import { Pet } from '../models/pet';
 import { ClinicVisit } from '../models/clinicVisit';
 import { Box, Autocomplete, TextField, Button, Typography, MenuItem, Select, TextareaAutosize, Dialog, DialogContent } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
+import { confirm } from '@tauri-apps/plugin-dialog';
 
 const Clinic = () => {
     const [pets, setPets] = useState<Pet[]>([]);
@@ -82,15 +83,17 @@ const Clinic = () => {
     };
 
     const handleDeleteVisitClick = (visitId: string) => {
-        if (window.confirm('本当に削除しますか？')) {
-            const clinicVisitRepository = new ClinicVisitFileRepository();
-            clinicVisitRepository.deleteClinicVisit(visitId).then(() => {
-                if (selectedPetId) {
-                    clinicVisitRepository.getClinicVisitsByPetId(selectedPetId).then(setClinicVisits);
-                }
-            });
-        }
-    };
+        confirm('本当に削除しますか？').then((isDelete) => {
+            if (isDelete) {
+                const clinicVisitRepository = new ClinicVisitFileRepository();
+                clinicVisitRepository.deleteClinicVisit(visitId).then(() => {
+                    if (selectedPetId) {
+                        clinicVisitRepository.getClinicVisitsByPetId(selectedPetId).then(setClinicVisits);
+                    }
+                });
+            }
+        });
+    }
 
     const handleSaveVisit = () => {
         if (!selectedPetId) return;
@@ -132,8 +135,15 @@ const Clinic = () => {
     const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (files) {
-            const fileArray = Array.from(files).map(file => URL.createObjectURL(file));
-            setNewVisitPhotos(prevPhotos => prevPhotos.concat(fileArray));
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    if (e.target?.result) {
+                        setNewVisitPhotos(prevPhotos => [...prevPhotos, e.target?.result as string]);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
         }
     };
 
@@ -146,6 +156,16 @@ const Clinic = () => {
         setDialogOpen(false);
         setDialogImage('');
     };
+
+    const handleDeletePhoto = (index: number) => {
+        confirm('画像を削除しますか？').then((isDelete) => {
+            if (isDelete) {
+                setNewVisitPhotos(prevPhotos => prevPhotos.filter((_, i) => i !== index));
+            }
+        });
+
+    }
+
 
     return (
         <Box sx={{ p: 2 }}>
@@ -225,9 +245,28 @@ const Clinic = () => {
                                 onChange={handlePhotoUpload}
                                 style={{ display: 'block', marginTop: '16px' }}
                             />
+                            <span>
+                                {newVisitPhotos.length > 0 && `写真 ${newVisitPhotos.length} 枚`}
+                            </span>
                             <Box mt={2} display="flex" flexWrap="wrap">
                                 {newVisitPhotos.map((photo, index) => (
-                                    <img key={index} src={photo} alt={`Visit Photo ${index + 1}`} style={{ width: '100px', height: '100px', marginRight: '8px', marginBottom: '8px', cursor: 'pointer' }} onClick={() => handleImageClick(photo)} />
+                                    <Box key={index} position="relative" display="inline-block" mr={1} mb={1}>
+                                        <img
+                                            src={photo}
+                                            alt={`Visit Photo ${index + 1}`}
+                                            style={{ width: '100px', height: '100px', cursor: 'pointer' }}
+                                            onClick={() => handleImageClick(photo)}
+                                        />
+                                        <Button
+                                            variant="contained"
+                                            color="secondary"
+                                            size="small"
+                                            onClick={() => handleDeletePhoto(index)}
+                                            style={{ position: 'absolute', top: 0, right: 0 }}
+                                        >
+                                            ×
+                                        </Button>
+                                    </Box>
                                 ))}
                             </Box>
                             <Box mt={2} display="flex" justifyContent="space-between">

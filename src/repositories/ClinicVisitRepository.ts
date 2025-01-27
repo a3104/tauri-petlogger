@@ -53,6 +53,7 @@ class ClinicVisitFileRepository implements IClinicVisitRepository {
     async saveAllClinicVisits(visits: ClinicVisit[]): Promise<void> {
         try {
             const jsonData = JSON.stringify(visits);
+            alert(jsonData.length);
             await this.store.set("clinicVisits", jsonData);
             await this.store.save();
         } catch (err) {
