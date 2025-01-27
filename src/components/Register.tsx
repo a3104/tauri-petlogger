@@ -3,12 +3,23 @@ import { Button, TextField, Select, MenuItem, InputLabel, Box, Typography } from
 import { FormEvent, useState } from "react";
 import { Pet } from "../models/pet";
 
-
 export default function Register({ isVisible, pet, handleUpdate, hideRegister }: { isVisible: boolean, pet: Pet, handleUpdate: (pet: Pet) => void, hideRegister: () => void }) {
     const [visible, setVisible] = useState(isVisible);
+    const [image, setImage] = useState<string>(pet.imageUrl || "");
 
     const handleCancel = () => {
         hideRegister();
+    };
+
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImage(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -23,7 +34,9 @@ export default function Register({ isVisible, pet, handleUpdate, hideRegister }:
             Number(form.get("birthMonth")),
             Number(form.get("birthDay")),
             Number(form.get("gender")),
-            Number(form.get("targetWeight"))
+            Number(form.get("targetWeight")),
+            pet.latestWeight,
+            image
         );
         handleUpdate(petData);
         setVisible(false);
@@ -95,13 +108,24 @@ export default function Register({ isVisible, pet, handleUpdate, hideRegister }:
                         label="目標体重"
                         variant="outlined"
                         inputProps={{ step: "0.1" }}
-
                         fullWidth
                         margin="normal"
                         name="targetWeight"
                         defaultValue={pet.targetWeight}
                         type="number"
                     />
+                    <InputLabel>ペットの画像</InputLabel>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        style={{ display: 'block', marginTop: '10px' }}
+                    />
+                    {image && (
+                        <Box sx={{ mt: 2 }}>
+                            <img src={image} alt="Pet" style={{ maxWidth: '100%' }} />
+                        </Box>
+                    )}
                     <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                         <Button type="submit" variant="contained" color="primary" fullWidth>登録</Button>
                         <Button variant="outlined" color="secondary" fullWidth onClick={handleCancel}>キャンセル</Button>
