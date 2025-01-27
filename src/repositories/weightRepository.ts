@@ -38,6 +38,24 @@ export class WeightRepository {
             return [];
         }
     }
+
+    async getAllWeights(): Promise<{ petId: number; date: string; weight: number }[]> {
+        try {
+            const keys = await this.store.keys();
+            const allWeights: { petId: number; date: string; weight: number }[] = [];
+            for (const key of keys) {
+                if (key.startsWith('weights_')) {
+                    const weights = await this.getWeights(parseInt(key.split('_')[1]));
+                    allWeights.push(...weights);
+                }
+            }
+            return allWeights;
+        } catch (err) {
+            console.error(err);
+            alert(err);
+            return [];
+        }
+    }
 }
 
 export const weightRepository = new WeightRepository();

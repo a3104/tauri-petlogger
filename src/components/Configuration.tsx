@@ -1,6 +1,7 @@
 import { WeightRepository } from '../repositories/weightRepository';
 import { Pet } from '../models/pet';
 import PetFileRepository from '../repositories/PetFileRepository';
+import ClinicVisitFileRepository from '../repositories/ClinicVisitRepository';
 import { Box, Button } from "@mui/material";
 
 const Configuration = () => {
@@ -51,26 +52,94 @@ const Configuration = () => {
         }
     };
 
+    const importClinicVisitData = async (fileContent: string) => {
+        const clinicVisitRepository = new ClinicVisitFileRepository();
+        try {
+            const clinicVisits = JSON.parse(fileContent);
+            await clinicVisitRepository.saveAllClinicVisits(clinicVisits);
+            alert('Clinic visit data imported successfully!');
+        } catch (e) {
+            alert('Failed to import clinic visit data.');
+        }
+    };
+
+    const exportPetData = async () => {
+        const petRepository = new PetFileRepository();
+        const pets = await petRepository.getAllPets();
+        const json = JSON.stringify(pets, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'pets.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const exportWeightData = async () => {
+        const weightRepository = new WeightRepository();
+        const weights = await weightRepository.getAllWeights();
+        const json = JSON.stringify(weights, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'weights.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const exportClinicVisitData = async () => {
+        const clinicVisitRepository = new ClinicVisitFileRepository();
+        const clinicVisits = await clinicVisitRepository.getAllClinicVisits();
+        const json = JSON.stringify(clinicVisits, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'clinic_visits.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div>
             <h1>設定</h1>
             <h3>データ管理</h3>
             <div>
-                {/* <button onClick={exportPetData}>Export Pet Data</button> */}
                 <Box>
                     <Button component="label" variant="contained" color="primary">
                         ペット情報のimport
                         <input type="file" accept=".json" onChange={(e) => handleFileUpload(e, importPetData)} hidden/>
                     </Button>
                 </Box>
-                {/* <button onClick={exportWeightData}>Export Weight Data</button> */}
                 <Box>
                     <Button component="label" variant="contained" color="primary">
                         体重情報のimport
                         <input type="file" accept=".json" onChange={(e) => handleFileUpload(e, importWeightData)} hidden/>
                     </Button>
                 </Box>
-                
+                <Box>
+                    <Button component="label" variant="contained" color="primary">
+                        通院記録のimport
+                        <input type="file" accept=".json" onChange={(e) => handleFileUpload(e, importClinicVisitData)} hidden/>
+                    </Button>
+                </Box>
+                <Box>
+                    <Button variant="contained" color="primary" onClick={exportPetData}>
+                        ペット情報のexport
+                    </Button>
+                </Box>
+                <Box>
+                    <Button variant="contained" color="primary" onClick={exportWeightData}>
+                        体重情報のexport
+                    </Button>
+                </Box>
+                <Box>
+                    <Button variant="contained" color="primary" onClick={exportClinicVisitData}>
+                        通院記録のexport
+                    </Button>
+                </Box>
             </div>
         </div>
     );

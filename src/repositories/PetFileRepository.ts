@@ -77,6 +77,11 @@ class PetFileRepository implements IPetRepository {
         pets = pets.filter(pet => pet.id !== id);
         await this.saveAllPets(pets);
     }
+
+    async exportAllPets(): Promise<string> {
+        const pets = await this.getAllPets();
+        return JSON.stringify(pets, null, 2);
+    }
 }
 
 export default PetFileRepository;
