@@ -4,4 +4,5 @@ export interface ClinicVisit {
     date: string;
     hospitalName: string;
     condition: string;
+    photos: string[]; // P6f3e
 }

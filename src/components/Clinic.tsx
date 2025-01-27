@@ -14,6 +14,7 @@ const Clinic = () => {
     const [newVisitDate, setNewVisitDate] = useState<string>('');
     const [newVisitHospitalName, setNewVisitHospitalName] = useState<string>('');
     const [newVisitCondition, setNewVisitCondition] = useState<string>('');
+    const [newVisitPhotos, setNewVisitPhotos] = useState<string[]>([]); // P2fab
     const inputRef = useRef<HTMLInputElement>(null);
     const [hospitalNames, setHospitalNames] = useState<string[]>([]);
     const [inputValue, setInputValue] = useState('');
@@ -74,6 +75,7 @@ const Clinic = () => {
         if (visitToEdit) {
             setEditingVisitData(visitToEdit);
             setIsEditingVisit(true);
+            setNewVisitPhotos(visitToEdit.photos || []); // P1e48
         }
     };
 
@@ -96,6 +98,7 @@ const Clinic = () => {
             date: newVisitDate,
             hospitalName: newVisitHospitalName,
             condition: newVisitCondition,
+            photos: newVisitPhotos, // P4d8e
         };
         const clinicVisitRepository = new ClinicVisitFileRepository();
         const savePromise = isEditingVisit
@@ -108,6 +111,7 @@ const Clinic = () => {
             setNewVisitDate('');
             setNewVisitHospitalName('');
             setNewVisitCondition('');
+            setNewVisitPhotos([]); // P4d8e
             setEditingVisitData(null);
             clinicVisitRepository.getClinicVisitsByPetId(selectedPetId).then(setClinicVisits); // Refresh visits
         });
@@ -119,7 +123,16 @@ const Clinic = () => {
         setNewVisitDate('');
         setNewVisitHospitalName('');
         setNewVisitCondition('');
+        setNewVisitPhotos([]); // P4d8e
         setEditingVisitData(null);
+    };
+
+    const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files) {
+            const fileArray = Array.from(files).map(file => URL.createObjectURL(file));
+            setNewVisitPhotos(prevPhotos => prevPhotos.concat(fileArray));
+        }
     };
 
     return (
@@ -193,6 +206,18 @@ const Clinic = () => {
                                 minRows={3}
                                 placeholder="病状"
                             />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handlePhotoUpload}
+                                style={{ display: 'block', marginTop: '16px' }}
+                            />
+                            <Box mt={2} display="flex" flexWrap="wrap">
+                                {newVisitPhotos.map((photo, index) => (
+                                    <img key={index} src={photo} alt={`Visit Photo ${index + 1}`} style={{ width: '100px', height: '100px', marginRight: '8px', marginBottom: '8px' }} />
+                                ))}
+                            </Box>
                             <Box mt={2} display="flex" justifyContent="space-between">
                                 <Button variant="contained" color="primary" onClick={handleSaveVisit}>
                                     保存
