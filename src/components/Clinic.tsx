@@ -3,7 +3,7 @@ import PetFileRepository from '../repositories/PetFileRepository';
 import ClinicVisitFileRepository from '../repositories/ClinicVisitRepository';
 import { Pet } from '../models/pet';
 import { ClinicVisit } from '../models/clinicVisit';
-import { Box, Autocomplete, TextField, Button, Typography, MenuItem, Select, TextareaAutosize } from '@mui/material';
+import { Box, Autocomplete, TextField, Button, Typography, MenuItem, Select, TextareaAutosize, Dialog, DialogContent } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
 
 const Clinic = () => {
@@ -14,7 +14,7 @@ const Clinic = () => {
     const [newVisitDate, setNewVisitDate] = useState<string>('');
     const [newVisitHospitalName, setNewVisitHospitalName] = useState<string>('');
     const [newVisitCondition, setNewVisitCondition] = useState<string>('');
-    const [newVisitPhotos, setNewVisitPhotos] = useState<string[]>([]); // P2fab
+    const [newVisitPhotos, setNewVisitPhotos] = useState<string[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
     const [hospitalNames, setHospitalNames] = useState<string[]>([]);
     const [inputValue, setInputValue] = useState('');
@@ -22,6 +22,8 @@ const Clinic = () => {
     const [editingVisitData, setEditingVisitData] = useState<ClinicVisit | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [filteredClinicVisits, setFilteredClinicVisits] = useState<ClinicVisit[]>([]);
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+    const [dialogImage, setDialogImage] = useState<string>('');
 
     useEffect(() => {
         const petRepository = new PetFileRepository();
@@ -33,7 +35,7 @@ const Clinic = () => {
             const clinicVisitRepository = new ClinicVisitFileRepository();
             clinicVisitRepository.getClinicVisitsByPetId(selectedPetId).then(visits => {
                 setClinicVisits(visits);
-                setFilteredClinicVisits(visits); // 初期表示は全件表示
+                setFilteredClinicVisits(visits);
                 const names = [...new Set(visits.map(visit => visit.hospitalName))];
                 setHospitalNames(names);
             });
@@ -75,7 +77,7 @@ const Clinic = () => {
         if (visitToEdit) {
             setEditingVisitData(visitToEdit);
             setIsEditingVisit(true);
-            setNewVisitPhotos(visitToEdit.photos || []); // P1e48
+            setNewVisitPhotos(visitToEdit.photos || []);
         }
     };
 
@@ -98,7 +100,7 @@ const Clinic = () => {
             date: newVisitDate,
             hospitalName: newVisitHospitalName,
             condition: newVisitCondition,
-            photos: newVisitPhotos, // P4d8e
+            photos: newVisitPhotos,
         };
         const clinicVisitRepository = new ClinicVisitFileRepository();
         const savePromise = isEditingVisit
@@ -111,9 +113,9 @@ const Clinic = () => {
             setNewVisitDate('');
             setNewVisitHospitalName('');
             setNewVisitCondition('');
-            setNewVisitPhotos([]); // P4d8e
+            setNewVisitPhotos([]);
             setEditingVisitData(null);
-            clinicVisitRepository.getClinicVisitsByPetId(selectedPetId).then(setClinicVisits); // Refresh visits
+            clinicVisitRepository.getClinicVisitsByPetId(selectedPetId).then(setClinicVisits);
         });
     };
 
@@ -123,7 +125,7 @@ const Clinic = () => {
         setNewVisitDate('');
         setNewVisitHospitalName('');
         setNewVisitCondition('');
-        setNewVisitPhotos([]); // P4d8e
+        setNewVisitPhotos([]);
         setEditingVisitData(null);
     };
 
@@ -133,6 +135,16 @@ const Clinic = () => {
             const fileArray = Array.from(files).map(file => URL.createObjectURL(file));
             setNewVisitPhotos(prevPhotos => prevPhotos.concat(fileArray));
         }
+    };
+
+    const handleImageClick = (image: string) => {
+        setDialogImage(image);
+        setDialogOpen(true);
+    };
+
+    const handleCloseDialog = () => {
+        setDialogOpen(false);
+        setDialogImage('');
     };
 
     return (
@@ -215,7 +227,7 @@ const Clinic = () => {
                             />
                             <Box mt={2} display="flex" flexWrap="wrap">
                                 {newVisitPhotos.map((photo, index) => (
-                                    <img key={index} src={photo} alt={`Visit Photo ${index + 1}`} style={{ width: '100px', height: '100px', marginRight: '8px', marginBottom: '8px' }} />
+                                    <img key={index} src={photo} alt={`Visit Photo ${index + 1}`} style={{ width: '100px', height: '100px', marginRight: '8px', marginBottom: '8px', cursor: 'pointer' }} onClick={() => handleImageClick(photo)} />
                                 ))}
                             </Box>
                             <Box mt={2} display="flex" justifyContent="space-between">
@@ -253,6 +265,12 @@ const Clinic = () => {
                     </table>
                 </Box>
             )}
+
+            <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+                <DialogContent>
+                    <img src={dialogImage} alt="Enlarged" style={{ width: '100%', height: 'auto' }} />
+                </DialogContent>
+            </Dialog>
         </Box>
     );
 };
