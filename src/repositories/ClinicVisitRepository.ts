@@ -33,6 +33,7 @@ class ClinicVisitFileRepository implements IClinicVisitRepository {
                 } else {
                     let clinicVisits = JSON.parse(res);
                     let clinicVisits2: ClinicVisit[] = clinicVisits.map((visit: any) => {
+                        visit.photos = visit.photos || [];
                         return visit as ClinicVisit;
                     });
                     return clinicVisits2 as ClinicVisit[];
@@ -52,6 +53,7 @@ class ClinicVisitFileRepository implements IClinicVisitRepository {
     async saveAllClinicVisits(visits: ClinicVisit[]): Promise<void> {
         try {
             const jsonData = JSON.stringify(visits);
+            alert(jsonData.length);
             await this.store.set("clinicVisits", jsonData);
             await this.store.save();
         } catch (err) {
@@ -75,7 +77,6 @@ class ClinicVisitFileRepository implements IClinicVisitRepository {
             throw new Error("Could not add clinic visit");
         }
     }
-
 
     async updateClinicVisit(visit: ClinicVisit): Promise<void> {
         const visits = await this.getAllClinicVisits();

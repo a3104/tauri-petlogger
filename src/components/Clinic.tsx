@@ -3,8 +3,9 @@ import PetFileRepository from '../repositories/PetFileRepository';
 import ClinicVisitFileRepository from '../repositories/ClinicVisitRepository';
 import { Pet } from '../models/pet';
 import { ClinicVisit } from '../models/clinicVisit';
-import { Box, Autocomplete, TextField, Button, Typography, MenuItem, Select, TextareaAutosize } from '@mui/material';
+import { Box, Autocomplete, TextField, Button, Typography, MenuItem, Select, TextareaAutosize, Dialog, DialogContent } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
+import { confirm } from '@tauri-apps/plugin-dialog';
 
 const Clinic = () => {
     const [pets, setPets] = useState<Pet[]>([]);
@@ -14,6 +15,7 @@ const Clinic = () => {
     const [newVisitDate, setNewVisitDate] = useState<string>('');
     const [newVisitHospitalName, setNewVisitHospitalName] = useState<string>('');
     const [newVisitCondition, setNewVisitCondition] = useState<string>('');
+    const [newVisitPhotos, setNewVisitPhotos] = useState<string[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
     const [hospitalNames, setHospitalNames] = useState<string[]>([]);
     const [inputValue, setInputValue] = useState('');
@@ -21,6 +23,8 @@ const Clinic = () => {
     const [editingVisitData, setEditingVisitData] = useState<ClinicVisit | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [filteredClinicVisits, setFilteredClinicVisits] = useState<ClinicVisit[]>([]);
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+    const [dialogImage, setDialogImage] = useState<string>('');
 
     useEffect(() => {
         const petRepository = new PetFileRepository();
@@ -32,7 +36,7 @@ const Clinic = () => {
             const clinicVisitRepository = new ClinicVisitFileRepository();
             clinicVisitRepository.getClinicVisitsByPetId(selectedPetId).then(visits => {
                 setClinicVisits(visits);
-                setFilteredClinicVisits(visits); // 初期表示は全件表示
+                setFilteredClinicVisits(visits);
                 const names = [...new Set(visits.map(visit => visit.hospitalName))];
                 setHospitalNames(names);
             });
@@ -74,19 +78,22 @@ const Clinic = () => {
         if (visitToEdit) {
             setEditingVisitData(visitToEdit);
             setIsEditingVisit(true);
+            setNewVisitPhotos(visitToEdit.photos || []);
         }
     };
 
     const handleDeleteVisitClick = (visitId: string) => {
-        if (window.confirm('本当に削除しますか？')) {
-            const clinicVisitRepository = new ClinicVisitFileRepository();
-            clinicVisitRepository.deleteClinicVisit(visitId).then(() => {
-                if (selectedPetId) {
-                    clinicVisitRepository.getClinicVisitsByPetId(selectedPetId).then(setClinicVisits);
-                }
-            });
-        }
-    };
+        confirm('本当に削除しますか？').then((isDelete) => {
+            if (isDelete) {
+                const clinicVisitRepository = new ClinicVisitFileRepository();
+                clinicVisitRepository.deleteClinicVisit(visitId).then(() => {
+                    if (selectedPetId) {
+                        clinicVisitRepository.getClinicVisitsByPetId(selectedPetId).then(setClinicVisits);
+                    }
+                });
+            }
+        });
+    }
 
     const handleSaveVisit = () => {
         if (!selectedPetId) return;
@@ -96,6 +103,7 @@ const Clinic = () => {
             date: newVisitDate,
             hospitalName: newVisitHospitalName,
             condition: newVisitCondition,
+            photos: newVisitPhotos,
         };
         const clinicVisitRepository = new ClinicVisitFileRepository();
         const savePromise = isEditingVisit
@@ -108,8 +116,9 @@ const Clinic = () => {
             setNewVisitDate('');
             setNewVisitHospitalName('');
             setNewVisitCondition('');
+            setNewVisitPhotos([]);
             setEditingVisitData(null);
-            clinicVisitRepository.getClinicVisitsByPetId(selectedPetId).then(setClinicVisits); // Refresh visits
+            clinicVisitRepository.getClinicVisitsByPetId(selectedPetId).then(setClinicVisits);
         });
     };
 
@@ -119,8 +128,44 @@ const Clinic = () => {
         setNewVisitDate('');
         setNewVisitHospitalName('');
         setNewVisitCondition('');
+        setNewVisitPhotos([]);
         setEditingVisitData(null);
     };
+
+    const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files) {
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    if (e.target?.result) {
+                        setNewVisitPhotos(prevPhotos => [...prevPhotos, e.target?.result as string]);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    };
+
+    const handleImageClick = (image: string) => {
+        setDialogImage(image);
+        setDialogOpen(true);
+    };
+
+    const handleCloseDialog = () => {
+        setDialogOpen(false);
+        setDialogImage('');
+    };
+
+    const handleDeletePhoto = (index: number) => {
+        confirm('画像を削除しますか？').then((isDelete) => {
+            if (isDelete) {
+                setNewVisitPhotos(prevPhotos => prevPhotos.filter((_, i) => i !== index));
+            }
+        });
+
+    }
+
 
     return (
         <Box sx={{ p: 2 }}>
@@ -193,6 +238,37 @@ const Clinic = () => {
                                 minRows={3}
                                 placeholder="病状"
                             />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handlePhotoUpload}
+                                style={{ display: 'block', marginTop: '16px' }}
+                            />
+                            <span>
+                                {newVisitPhotos.length > 0 && `写真 ${newVisitPhotos.length} 枚`}
+                            </span>
+                            <Box mt={2} display="flex" flexWrap="wrap">
+                                {newVisitPhotos.map((photo, index) => (
+                                    <Box key={index} position="relative" display="inline-block" mr={1} mb={1}>
+                                        <img
+                                            src={photo}
+                                            alt={`Visit Photo ${index + 1}`}
+                                            style={{ width: '100px', height: '100px', cursor: 'pointer' }}
+                                            onClick={() => handleImageClick(photo)}
+                                        />
+                                        <Button
+                                            variant="contained"
+                                            color="secondary"
+                                            size="small"
+                                            onClick={() => handleDeletePhoto(index)}
+                                            style={{ position: 'absolute', top: 0, right: 0 }}
+                                        >
+                                            ×
+                                        </Button>
+                                    </Box>
+                                ))}
+                            </Box>
                             <Box mt={2} display="flex" justifyContent="space-between">
                                 <Button variant="contained" color="primary" onClick={handleSaveVisit}>
                                     保存
@@ -228,6 +304,12 @@ const Clinic = () => {
                     </table>
                 </Box>
             )}
+
+            <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+                <DialogContent>
+                    <img src={dialogImage} alt="Enlarged" style={{ width: '100%', height: 'auto' }} />
+                </DialogContent>
+            </Dialog>
         </Box>
     );
 };

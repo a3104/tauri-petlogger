@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import React from 'react';
 import { Pet } from "../models/pet";
 import { TextField, Button, Box, Typography, MenuItem, Select } from "@mui/material";
 import PetFileRepository from "../repositories/PetFileRepository";
@@ -15,6 +16,8 @@ interface WeightRecord {
     weight: number;
 }
 
+import { Modal } from "@mui/material";
+
 export default function AddWeights() {
     const [pets, setPets] = useState<Pet[]>([] as Pet[]);
     const [selectedPetId, setSelectedPetId] = useState<number | null>(null);
@@ -25,7 +28,22 @@ export default function AddWeights() {
     const petRepository = new PetFileRepository();
     const weightRepository = new WeightRepository(); // 追加
     const [showChart, setShowChart] = useState(false);
+    const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
     const [targetWeight, setTargetWeight] = useState<number | null>(null);
+
+    const handleDeleteImage = async () => {
+        if (selectedPetId !== null) {
+            const currentPet = await petRepository.getPetById(selectedPetId);
+            if (currentPet) {
+                const updatedPet = Object.assign(new Pet(), { ...currentPet, imageUrl: null });
+                const updatedPets = pets.map(pet =>
+                    pet.id === selectedPetId ? updatedPet : pet
+                );
+                setPets(updatedPets);
+                await petRepository.updatePet(updatedPet);
+            }
+        }
+    };
 
     useEffect(() => {
         const fetchPets = async () => {
@@ -103,9 +121,9 @@ export default function AddWeights() {
             {
                 label: '体重 (kg)',
                 data: reversedWeightRecordsForChart.map(record => record.weight),
-                borderColor: reversedWeightRecordsForChart.map(record =>
-                    targetWeight && record.weight > targetWeight ? 'rgba(255,0,0,1)' : 'rgba(75,192,192,1)'
-                ),
+                borderColor:  targetWeight ? reversedWeightRecordsForChart.map(record =>
+                    record.weight > targetWeight ? 'rgba(255,0,0,1)' : 'rgba(75,192,192,1)'
+                ) : 'rgba(75,192,192,1)',
                 backgroundColor: 'rgba(75,192,192,0.2)',
                 fill: true,
                 segment: {
@@ -178,16 +196,22 @@ export default function AddWeights() {
             <Box mt={2}>
             {selectedPetId !== null && (() => {
                 const pet = pets.find(p => p.id === selectedPetId);
-                return pet && pet.imageUrl ? <img style={{ width: 100, height: 100 }} src={pet.imageUrl} alt={pet.name} /> : null;
+                return pet && pet.imageUrl ? (
+                    <div>
+                        <img style={{ width: 100, height: 100, cursor: 'pointer' }} src={pet.imageUrl} alt={pet.name} onClick={() => setEnlargedImage(pet.imageUrl)} />
+                        <Button variant="outlined" color="secondary" onClick={handleDeleteImage} style={{ marginLeft: 8 }}>
+                            画像を削除
+                        </Button>
+                    </div>
+                ) : null;
             })()}
-
                 <Typography variant="h6" component="h3">
                     記録一覧
                 </Typography>
                 {weightRecords
                     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).reverse()
                     .map((record, index) => (
-                        <Box key={index} display="flex" justifyContent="space-between" mt={1}>
+                        <><Box key={index} display="flex" justifyContent="space-between" mt={1}>
                             <Typography>{record.date}</Typography>
                             <Typography
                                 style={{ color: targetWeight && record.weight > targetWeight ? 'orange' : 'inherit' }}
@@ -198,7 +222,22 @@ export default function AddWeights() {
                             <Button variant="outlined" color="secondary" onClick={() => handleDeleteWeight(record.date)}>
                                 削除
                             </Button>
-                        </Box>
+                        </Box><React.Fragment>
+                                <Box>
+                                    <Modal open={!!enlargedImage} onClose={() => setEnlargedImage(null)}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+                                            {enlargedImage && (
+                                                <>
+                                                    <img src={enlargedImage} alt="Enlarged" style={{ maxWidth: '90%', maxHeight: '90%' }} />
+                                                    <Button variant="contained" color="secondary" onClick={handleDeleteImage} style={{ marginTop: 8 }}>
+                                                        画像を削除
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </Box>
+                                    </Modal>
+                                </Box>
+                            </React.Fragment></>
                     ))}
             </Box>
         </Box>
