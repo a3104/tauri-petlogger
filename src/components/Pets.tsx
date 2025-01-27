@@ -96,7 +96,7 @@ export const Pets = () => {
                                     <TableCell><Typography variant="body2">{pet.gender === 1 ? "オス" : pet.gender === 2 ? "メス" : "-"}</Typography></TableCell>
                                     <TableCell><Typography variant="body2">{pet.targetWeight ? `${pet.targetWeight} kg` : '-'}</Typography></TableCell>
                                     <TableCell>
-                                        {pet.image && <img src={pet.image} alt="Pet" style={{ maxWidth: '100px', maxHeight: '100px' }} />}
+                                        {pet.imageUrl && <img src={pet.imageUrl} alt="Pet" style={{ maxWidth: '100px', maxHeight: '100px' }} />}
                                     </TableCell>
                                     <TableCell>
                                         <Button variant="outlined" color="primary" size="small" onClick={() => handleEdit(pet)}>編集</Button>

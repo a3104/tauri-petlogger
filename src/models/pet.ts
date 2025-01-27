@@ -15,8 +15,7 @@ export class Pet {
         public gender: number = 0,
         public targetWeight: number = 0,
         public latestWeight: number = 0,
-        public clinicVisits: ClinicVisit[] = [],
-        public image: string = "" // base64 encoded image data
+        public imageUrl: string = "" // base64 encoded image data
     ) { }
 
     getAge(): number {

@@ -5,7 +5,7 @@ import { Pet } from "../models/pet";
 
 export default function Register({ isVisible, pet, handleUpdate, hideRegister }: { isVisible: boolean, pet: Pet, handleUpdate: (pet: Pet) => void, hideRegister: () => void }) {
     const [visible, setVisible] = useState(isVisible);
-    const [image, setImage] = useState<string>(pet.image || "");
+    const [image, setImage] = useState<string>(pet.imageUrl || "");
 
     const handleCancel = () => {
         hideRegister();
@@ -36,7 +36,6 @@ export default function Register({ isVisible, pet, handleUpdate, hideRegister }:
             Number(form.get("gender")),
             Number(form.get("targetWeight")),
             pet.latestWeight,
-            pet.clinicVisits,
             image
         );
         handleUpdate(petData);
