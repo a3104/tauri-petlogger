@@ -3,13 +3,13 @@ import { Pet } from '../models/pet';
 import PetFileRepository from '../repositories/PetFileRepository';
 import ClinicVisitFileRepository from '../repositories/ClinicVisitRepository';
 import { Box, Button } from "@mui/material";
-import { useState } from 'react';
+// import { useState } from 'react';
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeTextFile } from '@tauri-apps/plugin-fs';
 
 export const Configuration = () => {
 
-    const [ setExportPetDataUrl] = useState<string>('');
+    // const [ setExportPetDataUrl] = useState<string>('');
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, importFunction: (fileContent: string) => Promise<void>) => {
         const file = event.target.files?.[0];
