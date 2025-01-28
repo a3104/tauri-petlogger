@@ -6,6 +6,9 @@ interface IClinicVisitRepository {
     addClinicVisit(visit: ClinicVisit): Promise<void>;
     updateClinicVisit(visit: ClinicVisit): Promise<void>;
     deleteClinicVisit(id: string): Promise<void>;
+    getAllClinicVisits(): Promise<ClinicVisit[]>;
+    saveAllClinicVisits(visits: ClinicVisit[]): Promise<void>;
+    exportAllClinicVisits(): Promise<string>;
 }
 
 class ClinicVisitFileRepository implements IClinicVisitRepository {
@@ -93,6 +96,11 @@ class ClinicVisitFileRepository implements IClinicVisitRepository {
         let visits = await this.getAllClinicVisits();
         visits = visits.filter(visit => visit.id !== id);
         await this.saveAllClinicVisits(visits);
+    }
+
+    async exportAllClinicVisits(): Promise<string> {
+        const visits = await this.getAllClinicVisits();
+        return JSON.stringify(visits, null, 2);
     }
 }
 

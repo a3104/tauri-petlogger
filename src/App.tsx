@@ -12,7 +12,7 @@ import Menu from "./components/menu";
 import Register from "./components/Register";
 import { Pet } from "./models/pet";
 import Pets from "./components/Pets";
-import Configuration from "./components/Configuration.tsx";
+import { Configuration } from "./components/Configuration.tsx";
 import Clinic from "./components/Clinic.tsx";
 
 function App() {
