@@ -3,13 +3,11 @@ import { Pet } from '../models/pet';
 import PetFileRepository from '../repositories/PetFileRepository';
 import ClinicVisitFileRepository from '../repositories/ClinicVisitRepository';
 import { Box, Button } from "@mui/material";
-// import { useState } from 'react';
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeTextFile } from '@tauri-apps/plugin-fs';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 export const Configuration = () => {
-
-    // const [ setExportPetDataUrl] = useState<string>('');
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, importFunction: (fileContent: string) => Promise<void>) => {
         const file = event.target.files?.[0];
@@ -22,8 +20,6 @@ export const Configuration = () => {
             reader.readAsText(file);
         }
     };
-
-    
 
     const exportAllData = async () => {
         const petRepository = new PetFileRepository();
@@ -41,20 +37,12 @@ export const Configuration = () => {
         };
 
         const json = JSON.stringify(allData, null, 2);
-        // const blob = new Blob([json], { type: 'application/force-download' });
-
-
-        // const url = URL.createObjectURL(blob);
         const filePath = await save({ defaultPath: 'all_data.json' });
         if (filePath) {
             await writeTextFile(filePath, json);
-           
         }
-
     };
 
-
-    
     const importAllData = async (fileContent: string) => {
         try {
             const allData = JSON.parse(fileContent);
@@ -82,7 +70,7 @@ export const Configuration = () => {
     const importWeightDataFromJson = async (weightsJson: any) => {
         const weightRepository = new WeightRepository();
         try {
-            const weights = weightsJson; // Assuming Weight type is properly handled in WeightRepository
+            const weights = weightsJson;
             const weightsByPetId = weights.reduce((acc: { [key: number]: any[] }, weight: { petId: number; date: string; weight: number }) => {
                 if (!acc[weight.petId]) {
                     acc[weight.petId] = [];
@@ -108,26 +96,45 @@ export const Configuration = () => {
         }
     };
 
+    const handleLoginSuccess = (response: any) => {
+        console.log('Login Success:', response);
+        // Handle login success (e.g., save token, update UI)
+    };
+
+    const handleLoginError = () => {
+        console.error('Login Failed');
+        // Handle login error
+    };
 
     return (
-        <div>
-            <h1>設定</h1>
-            <h3>データ管理</h3>
             <div>
-                <Box>
-                    <Button component="label" variant="contained" color="primary">
-                        すべてのデータimport
-                        <input type="file" accept=".json" onChange={(e) => handleFileUpload(e, importAllData)} hidden />
-                    </Button>
-                </Box>
+                <h1>設定</h1>
+                <h3>データ管理</h3>
+                <div>
+                    <Box>
+                        <Button component="label" variant="contained" color="primary">
+                            すべてのデータimport
+                            <input type="file" accept=".json" onChange={(e) => handleFileUpload(e, importAllData)} hidden />
+                        </Button>
+                    </Box>
 
+                    <Box>
+                        <Button variant="contained" color="primary" onClick={exportAllData}>
+                            すべてのデータexport
+                        </Button>
+                    </Box>
+                </div>
+                <h3>Google Login</h3>
+                <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID" >
                 <Box>
-                    <Button variant="contained" color="primary" onClick={exportAllData}>
-                        すべてのデータexport
-                    </Button>
+                    <GoogleLogin
+                        onSuccess={handleLoginSuccess}
+                        onError={handleLoginError}
+                    />
                 </Box>
-            </div>
-        </div>
+            
+                </GoogleOAuthProvider>
+                </div>
     );
 };
 

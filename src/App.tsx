@@ -14,6 +14,7 @@ import { Pet } from "./models/pet";
 import Pets from "./components/Pets";
 import { Configuration } from "./components/Configuration.tsx";
 import Clinic from "./components/Clinic.tsx";
+import UrineTest from "./components/UrineTest.tsx";
 
 function App() {
 
@@ -34,6 +35,7 @@ function App() {
                     <Route path="/vaccination" element={<Vaccination />} />
                     <Route path="/configuration" element={<Configuration />} />
                     <Route path="/clinic" element={<Clinic />} />
+                    <Route path="/urine-test" element={<UrineTest />} />
                     {/* <Route path="/medication" element={<Medication />} />
                     <Route path="/urine-test" element={<UrineTest />} /> */}
                 </Routes>

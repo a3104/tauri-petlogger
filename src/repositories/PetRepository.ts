@@ -9,4 +9,12 @@ export interface IPetRepository {
   saveAllPets(pets: Pet[]): Promise<void>;
 }
 
+const getAllPets = async (): Promise<Pet[]> => {
+  // Implement the logic to fetch all pets
+  // This could involve fetching from local storage, a database, or an API
+  return [];
+};
+
+export { getAllPets };
+
 
