@@ -2,6 +2,7 @@ import { WeightRepository } from '../repositories/weightRepository';
 import { Pet } from '../models/pet';
 import PetFileRepository from '../repositories/PetFileRepository';
 import ClinicVisitFileRepository from '../repositories/ClinicVisitRepository';
+import UrineTestRepository from '../repositories/UrineTestRepository';
 import { Box, Button } from "@mui/material";
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeTextFile } from '@tauri-apps/plugin-fs';
@@ -29,11 +30,20 @@ export const Configuration = () => {
         const pets = await petRepository.getAllPets();
         const weights = await weightRepository.getAllWeights();
         const clinicVisits = await clinicVisitRepository.getAllClinicVisits();
+        
+        // 全てのペットの尿検査データを取得
+        let allUrineTests: any[] = [];
+        for (const pet of pets) {
+            const urineTestRepository = new UrineTestRepository(pet.id);
+            const urineTests = await urineTestRepository.getAllTests();
+            allUrineTests = [...allUrineTests, ...urineTests];
+        }
 
         const allData = {
             pets: pets,
             weights: weights,
-            clinicVisits: clinicVisits
+            clinicVisits: clinicVisits,
+            urineTests: allUrineTests
         };
 
         const json = JSON.stringify(allData, null, 2);
@@ -49,6 +59,12 @@ export const Configuration = () => {
             await importPetDataFromJson(allData.pets);
             await importWeightDataFromJson(allData.weights);
             await importClinicVisitDataFromJson(allData.clinicVisits);
+            
+            // 尿検査データをインポート
+            if (allData.urineTests) {
+                await importUrineTestDataFromJson(allData.urineTests);
+            }
+            
             alert('All data imported successfully!');
         } catch (e) {
             alert('Failed to import all data.');
@@ -93,6 +109,28 @@ export const Configuration = () => {
             await clinicVisitRepository.saveAllClinicVisits(clinicVisitsJson);
         } catch (e) {
             alert('Failed to import clinic visit data.');
+        }
+    };
+
+    const importUrineTestDataFromJson = async (urineTestsJson: any) => {
+        try {
+            // ペットIDごとに尿検査データをグループ化
+            const urineTestsByPetId = urineTestsJson.reduce((acc: { [key: number]: any[] }, test: { petId: number }) => {
+                if (!acc[test.petId]) {
+                    acc[test.petId] = [];
+                }
+                acc[test.petId].push(test);
+                return acc;
+            }, {});
+
+            // 各ペットの尿検査データを保存
+            for (const petId in urineTestsByPetId) {
+                const urineTestRepository = new UrineTestRepository(Number(petId));
+                await urineTestRepository.saveAllTests(urineTestsByPetId[petId]);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Failed to import urine test data.');
         }
     };
 

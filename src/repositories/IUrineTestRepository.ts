@@ -1,10 +1,12 @@
 import { UrineTest } from '../models/urineTest';
 
 export interface IUrineTestRepository {
-    getAllTests(): Promise<UrineTest[]>;
-    getTestById(id: number): Promise<UrineTest | null>;
-    addTest(test: UrineTest): Promise<void>;
-    updateTest(test: UrineTest): Promise<void>;
-    deleteTest(id: number): Promise<void>;
-    exportAllTests(): Promise<string>;
+  getAllTests(): Promise<UrineTest[]>;
+  getTestById(id: string): Promise<UrineTest | null>;
+  getUrineTestsByPetId(petId: number): Promise<UrineTest[]>;
+  addUrineTest(test: UrineTest): Promise<void>;
+  updateUrineTest(id: string, test: UrineTest): Promise<void>;
+  deleteUrineTest(id: string): Promise<void>;
+  saveAllTests(tests: UrineTest[]): Promise<void>;
+  exportAllTests(): Promise<string>;
 }

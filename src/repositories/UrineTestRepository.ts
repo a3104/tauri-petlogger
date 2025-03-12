@@ -48,7 +48,7 @@ export class UrineTestRepository implements IUrineTestRepository {
 
     async getTestById(id: string): Promise<UrineTest | null> {
         const tests = await this.getAllTests();
-        return tests.find(test => test.id === id) || null;
+        return tests.find(test => test.id == id) || null;
     }
 
     async getUrineTestsByPetId(petId: number): Promise<UrineTest[]> {
